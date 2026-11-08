@@ -23,11 +23,11 @@ Piazza is a discussion platform where registered users publish posts by topic, r
 ### Structure
 
 - piazza/
-  &nbsp;main.py
-  &nbsp;.gitignore
-  &nbsp;README.md
-  &nbsp;development-log.md
-  &nbsp;requirements.txt
+  - main.py
+  - .gitignore
+  - README.md
+  - development-log.md
+  - requirements.txt
 
 ### Commands to install dependencies.
 
