@@ -88,8 +88,8 @@ piazza/
 
 ### 6. Commands to create the DB tables
 
-- SQLAlchemy reads models.py and builds the tables directly using create_all at start-up
-- db_setup.sql file is not involve in the table creation it serves as schema documentation
+- SQLAlchemy reads models.py and builds the tables the async def lifespan(app: FastAPI) function at start-up in the main.py file
+- db_setup.sql file is not involve in the table creation it serves as db schema documentation
 
 ### 7. Run all the tests
 

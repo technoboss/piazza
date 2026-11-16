@@ -35,3 +35,17 @@
 [15-Nov-26] Now, my code is ready to be pushed to GitHub repo
 
 ### Registration and authentication
+
+[16-Nov-26] Tackling users registration and authentication
+[16-Nov-26] API endpoints creation in Routers folder
+[16-Nov-26] Create a schema.py file to checks and cleans the data going into and out of the API using Pydantic
+[16-Nov-26] Create a security.py file to hash password from plain text using pwdlib
+[16-Nov-26] Requirements satisfied:
+
+- - Unique email address
+- - Email and password required, valid
+- - Store password hashes, never plaintext
+- - Don’t expose hashes or secrets in responses
+- - Login returning an expiring JWT, and rejecting a wrong password.
+- - A bearer token required on the business endpoints.
+- - Rejecting missing, invalid and expired tokens.
