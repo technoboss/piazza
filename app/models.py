@@ -1,9 +1,20 @@
 from sqlalchemy import (CheckConstraint, Column, DateTime, ForeignKey,
-                        Integer, String, Text, text,)
-from sqlalchemy.orm import relationship
-from app.database import Base
+                        Integer, String, Text, text, Table)
 
-NOW = text("(datetime('now'))")  # UTC, same default as db_setup.sql
+from sqlalchemy.orm import relationship
+
+from app.database import Base 
+
+NOW = text("(datetime('now'))") 
+
+# Junction table: one row = "this post belongs to this topic".
+# The composite primary key stops the same topic being attached twice to a post.
+post_topic = Table(
+    "post_topic",
+    Base.metadata,
+    Column("post_id", Integer, ForeignKey("post.post_id"), primary_key=True),
+    Column("topic_id", Integer, ForeignKey("topic.topic_id"), primary_key=True),
+)
 
 
 class User(Base):
@@ -32,7 +43,8 @@ class Topic(Base):
     name = Column(String(collation="NOCASE"), nullable=False, unique=True)
     description = Column(Text, nullable=False)
 
-    posts = relationship("Post", back_populates="topic")
+    # [CHANGE] many-to-many through post_topic (was one-to-many)
+    posts = relationship("Post", secondary=post_topic, back_populates="topics")
 
 
 class Post(Base):
@@ -45,17 +57,18 @@ class Post(Base):
     )
 
     post_id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+
     title = Column(String, nullable=False)
     body = Column(Text, nullable=False)
     created_at = Column(DateTime, nullable=False, server_default=NOW)
     expires_at = Column(DateTime, nullable=False)
-    
-    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
-    topic_id = Column(Integer, ForeignKey("topic.topic_id"), nullable=False)
 
     author = relationship("User", back_populates="posts")
-    topic = relationship("Topic", back_populates="posts")
-    comments = relationship("Comment", back_populates="post")
+    topics = relationship("Topic", secondary=post_topic, back_populates="posts")
+    comments = relationship(
+        "Comment", back_populates="post", order_by="[Comment.created_at, Comment.comment_id]"
+    )
     reactions = relationship("Reaction", back_populates="post")
 
 
@@ -67,14 +80,14 @@ class Comment(Base):
     )
 
     comment_id = Column(Integer, primary_key=True)
+    post_id = Column(Integer, ForeignKey("post.post_id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
     body = Column(Text, nullable=False)
     created_at = Column(DateTime, nullable=False, server_default=NOW)
 
-    post_id = Column(Integer, ForeignKey("post.post_id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
-
     post = relationship("Post", back_populates="comments")
     author = relationship("User", back_populates="comments")
+
 
 class Reaction(Base):
     __tablename__ = "reacts"
@@ -82,11 +95,10 @@ class Reaction(Base):
         CheckConstraint("datetime(reacted_at) IS NOT NULL", name="ck_reacts_reacted_at"),
     )
 
-    type = Column(String, nullable=False)
-    reacted_at = Column(DateTime, nullable=False, server_default=NOW)
-
     user_id = Column(Integer, ForeignKey("users.user_id"), primary_key=True)
     post_id = Column(Integer, ForeignKey("post.post_id"), primary_key=True)
+    type = Column(String, nullable=False)  # "like" or "dislike"
+    reacted_at = Column(DateTime, nullable=False, server_default=NOW)
 
     user = relationship("User", back_populates="reactions")
     post = relationship("Post", back_populates="reactions")
