@@ -6,6 +6,8 @@ from app.database import Base, engine
 
 import app.models
 
+from app.routers import auth, interactions, posts, topics 
+
 from app.routers import auth, posts, topics
 
 
@@ -23,6 +25,7 @@ app = FastAPI(title="Piazza", lifespan=lifespan)
 app.include_router(auth.router)
 app.include_router(topics.router)
 app.include_router(posts.router)
+app.include_router(interactions.router)
 
 
 # Public liveness check, also used later by Docker and GKE.

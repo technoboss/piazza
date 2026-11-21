@@ -1,4 +1,4 @@
-# Tests for the posts and topics requirements.
+
 from datetime import datetime, timedelta, timezone
 
 from app.models import Post, Topic
@@ -62,10 +62,11 @@ def test_post_ids_are_increasing_integers(client, auth_headers):
     assert isinstance(first["post_id"], int) and second["post_id"] == first["post_id"] + 1
 
 
-def test_post_with_naive_expiry_is_read_as_utc(client, auth_headers):
-    naive = (utcnow() + timedelta(hours=2)).isoformat()
+# This test used to expect 201 (a time without a timezone was read as UTC)
+def test_post_with_naive_expiry_is_rejected(client, auth_headers):
+    naive = (utcnow() + timedelta(hours=2)).isoformat()  # no Z, no offset
     r = client.post("/posts", json=new_post(expires_at=naive), headers=auth_headers)
-    assert r.status_code == 201
+    assert r.status_code == 422
 
 
 # ---------- validation ----------
